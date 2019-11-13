@@ -1,0 +1,25 @@
+# aggiungere nel menu la possibilità di fare lo switch HS - normale (per questioni di comodità del lavoro)
+    #todo aggiungere pop-up di avviso di disconnessione da internet (opzionale per ora)
+#todo mandare comandi al raspberry via ssh
+#todo verificare il suono presente in un'asola
+#todo assegnare i suoni nelle giuste asole
+#todo visualizzare dati vegeboard
+#todo settare il drag and drop
+
+#todo limitare la ricerca dei files nella tree view
+#todo rendere la gui adattativa ai vari schermi
+#todo disabilitare la tab vegeboard se non connessa
+
+#todo aggiungere check version oppure sistema di aggiornamento
+
+#todo aggiungere bug report
+
+#todo aggiungere altri suoni
+
+#todo aggiungere log in
+
+#todo aggiungere generatività degli users
+
+#todo aggiungere possibilità di salvare profili utenti su profili users
+
+#todo aggiungere finestra linux
