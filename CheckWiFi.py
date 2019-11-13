@@ -20,6 +20,9 @@ class CHECKWIFI(object):
         self.SAMENET = False
         self.RESULTS = subprocess.check_output(["netsh", "wlan", "show", "interfaces"]).decode("ISO-8859-1")
 
+    def setRightNetwork2(self,network):
+        network = self.RIGHTNETWORK2
+
     def refresh_RESULTS(self):
         self.RESULTS = subprocess.check_output(["netsh", "wlan", "show", "interfaces"]).decode("ISO-8859-1")
         return self.RESULTS

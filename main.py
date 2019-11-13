@@ -11,7 +11,7 @@ import time
 import pysftp
 import pickle
 import os
-from traceback import format_exc as traceb
+from traceback import format_exc as fex
 import paramiko
 from CheckWiFi import CHECKWIFI
 from tools.draggableItems_v2 import MyListWidgetItem, MyListWidget, DroppableLabel
@@ -25,7 +25,7 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
     PASSWD = "AL1LEIMI"
     LABEL_SIGNAL = QtCore.pyqtSignal(str)
     MTh_SIGNAL = QtCore.pyqtSignal()
-
+    fileImpostazioni = 'conf.ini'
     def __init__(self,parent=None):
         super(VBInterface, self).__init__(parent)
         self.setupUi(self)
@@ -37,6 +37,10 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
         self.strumentiPath = '/home/pi/Strumenti/'
         self.presetDict = {}
         self.defaultIni =odict()
+        try:
+            self.caricaImpostazioni()
+        except:
+            print(fex())
         self.mthread =  MThread(self.connectWifi)
         COLORS_A = ["background-color:rgba(0, 255, 0, 100);","background-color: rgba(255, 170, 0, 100);",
                     "background-color: rgba(255, 85, 0, 100);","background-color: rgba(85, 85, 255, 100);",
@@ -341,7 +345,7 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
             w.setText('')
             q.repaint()
         for l in lista:
-            print(l.objectName())
+            # print(l.objectName())
             l.setText('')
             l.setToolTip('')
             # ind = c - 1
@@ -369,17 +373,39 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
         self.dialog_settings.lineEdit.setText(self.VBADDRESS)
         self.dialog_settings.lineEdit_2.setText(self.RETE)
         self.dialog_settings.lineEdit_3.setText(self.PASSWD)
-        self.Dialog_impostazioni.exec_()
-        indirizzo = self.dialog_settings.lineEdit.text()
-        rete = self.dialog_settings.lineEdit_2.text()
-        password = self.dialog_settings.lineEdit_3.text()
-        if indirizzo != '':
-            self.change_settings(mode='addr',addr=indirizzo)
-        elif rete != '':
-            self.change_settings(mode='rete', addr=rete)
-        elif password != '':
-            self.change_settings(mode='passw', addr=password)
+        if self.Dialog_impostazioni.exec_():
+            indirizzo = self.dialog_settings.lineEdit.text()
+            rete = self.dialog_settings.lineEdit_2.text()
+            password = self.dialog_settings.lineEdit_3.text()
+            if indirizzo != '':
+                self.change_settings(mode='addr',addr=indirizzo)
+            if rete != '':
+                self.change_settings(mode='rete', rete=rete)
+            if password != '':
+                self.change_settings(mode='passw', passw=password)
+            self.salvaImpostazioni(indirizzo, rete, password)
 
+
+    def salvaImpostazioni(self, indirizzo, rete, password):
+        lista = [indirizzo, rete, password]
+        impostazioniStr = ''
+        for i in lista:
+            impostazioniStr +=str(i) + '\n'
+        with open(self.fileImpostazioni, 'w') as f:
+            f.write(impostazioniStr)
+
+
+    def caricaImpostazioni(self):
+        with open(self.fileImpostazioni, 'r') as f:
+            impostazioniStr = f.readlines()
+        print('caricaImpostazioni ************************', impostazioniStr)
+        if len(impostazioniStr) == 3:
+            self.VBADDRESS = impostazioniStr[0].strip('\n')
+            self.RETE = impostazioniStr[1].strip('\n')
+            self.PASSWD = impostazioniStr[2].strip('\n')
+            print(self.RETE, self.PASSWD)
+        else:
+            print('ELSE: caricaImpostazioni ************************',impostazioniStr)
     def change_settings(self,mode='addr',addr='',rete='',passw=''):
         if mode == 'addr':
             self.VBADDRESS = addr
@@ -387,11 +413,11 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
             return self.VBADDRESS
         elif mode == 'rete':
             self.RETE = rete
-            print("rete has changed")
+            print("rete has changed", self.RETE)
             return  self.RETE
         elif mode == 'passw':
             self.PASSWD = passw
-            print("PASSWD has changed")
+            print("PASSWD has changed", self.PASSWD)
             return self.PASSWD
 
     def commandSSH(self,cmd):
@@ -614,11 +640,8 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
             self.spinner_w.update()
             print('colore spinner: ',self.spinner_w.baseColor)
             print('status connessione: ', self.sshConnectStatus)
-
-            #todo spinner verde
-
         except paramiko.ssh_exception.SSHException:
-            #todo spinner rosso
+
             a = self.wifi.scanAround(self.wifi.RIGHTNETWORK2)
             self.SAMENET = self.wifi.checkNetwork(self.wifi.RIGHTNETWORK2)
             print('non connesso con la VB')
