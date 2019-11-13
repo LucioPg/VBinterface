@@ -126,6 +126,8 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
         self.bot_esci.clicked.connect(self.exit)
         self.bot_impostazioni.clicked.connect(self.dialog_settings)
         self.radio_hotSpot.toggled.connect(self.hs_switch)
+        self.radio_hotSpot.setEnabled(False)
+        self.bot_aggiungi.clicked.connect(self.addFile)
         ##setting combobox
         self.comboBox_strumenti.currentIndexChanged.connect(self.pop_lista_suoni)
         # self.radio_hotSpot.toggled.connect(self.connectSSH)
@@ -352,6 +354,7 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
             # w.setStyleSheet("{}".format(lista[ind]))
 
         self.frame_svg_3.blockSignals(False)
+
     def dialog_salva_preset(self):
         dialog_salva = QtWidgets.QDialog()
         ui = dialog_salva_preset()
@@ -366,6 +369,7 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
 
     def setVBADD(self):
         self.dialog_settings.lineEdit.setText(self.VBADDRESS)
+
     def dialog_settings(self):
         self.Dialog_impostazioni = QtWidgets.QDialog()
         self.dialog_settings = dialog_settings()
@@ -385,7 +389,6 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
                 self.change_settings(mode='passw', passw=password)
             self.salvaImpostazioni(indirizzo, rete, password)
 
-
     def salvaImpostazioni(self, indirizzo, rete, password):
         lista = [indirizzo, rete, password]
         impostazioniStr = ''
@@ -393,7 +396,6 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
             impostazioniStr +=str(i) + '\n'
         with open(self.fileImpostazioni, 'w') as f:
             f.write(impostazioniStr)
-
 
     def caricaImpostazioni(self):
         with open(self.fileImpostazioni, 'r') as f:
@@ -406,6 +408,7 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
             print(self.RETE, self.PASSWD)
         else:
             print('ELSE: caricaImpostazioni ************************',impostazioniStr)
+
     def change_settings(self,mode='addr',addr='',rete='',passw=''):
         if mode == 'addr':
             self.VBADDRESS = addr
@@ -449,6 +452,7 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
             print('connessione all\'indirizzo: ',addr)
             self.ssh.connect(hostname="192.168.1.15", username="pi", password="ciao",timeout=2000)
         #
+
     def hs_switch(self):
         if self.isconnected():
             self.connectSSH(1)
@@ -487,12 +491,27 @@ class VBInterface(VB_Gui.Ui_MainWindow,QtWidgets.QMainWindow):
                     # print('reparent: ',newpath)
                     sftp.chdir(newpath)
                     for inst in sftp.listdir():
-
                         self.dict_inst[k].append(inst)
 
             # print('self.dict_inst: ',self.dict_inst)
             return self.dict_inst, self.defaultIni
         else: return
+
+    def addFile(self):
+        # todo se connesso self.sshConnectStatus == True
+        dialog, _ = QtWidgets.QFileDialog().getOpenFileNames(filter='*.wav')
+        try:
+            print(dialog)
+            print(QtCore.QUrl().fromLocalFile(dialog[0]))
+            self.commandSSH()
+        except:
+            print(fex())
+
+        # if dialog.exec_():
+        #     try:
+        #         nomeFile = dialog.fileSelected()
+        #         print('FILE SELECTED: ', nomeFile)
+        #     except: print(fex())
 
     @QtCore.pyqtSlot(QtWidgets.QLabel,str)
     def setLabel(self,lab,txt,item=None):
